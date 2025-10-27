@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  
+  <title    >Hero_inteligencia_artificial</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg-gradient-light: linear-gradient(135deg, #2563eb, #10b981);
+      --bg-gradient-dark: linear-gradient(135deg, #111827, #1f2937);
+      --card-bg-light: #fff;
+      --card-bg-dark: #1f2937;
+      --text-light: #111827;
+      --text-dark: #f9fafb;
+      --btn-primary: #2563eb;
+      --btn-primary-hover: #1e4ed8;
+      --btn-secondary: #e5e7eb;
+      --btn-secondary-hover: #d1d5db;
+      --btn-secondary-dark: #374151;
+      --btn-secondary-dark-hover: #4b5563;
+      --btn-send: #10b981;
+      --btn-send-hover: #059669;
+    }
+
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--bg-gradient-light);
+    }
+
+    .app {
+      background: var(--card-bg-light);
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      width: 95%;
+      max-width: 420px;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-light);
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      margin: 1.5rem 0;
+    }
+
+    button {
+      padding: 1rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: var(--btn-primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--btn-primary-hover); }
+
+    .btn-secondary {
+      background: var(--btn-secondary);
+      color: var(--text-light);
+    }
+    .btn-secondary:hover { background: var(--btn-secondary-hover); }
+
+    .send-btn {
+      background: var(--btn-send);
+      color: #fff;
+    }
+    .send-btn:hover { background: var(--btn-send-hover); }
+
+    /* 🔴 Pulso en botón grabar */
+    .recording {
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220,38,38, 0.6); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(220,38,38, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220,38,38, 0); }
+    }
+
+    /* 🌊 Onda animada */
+    .wave {
+      display: flex;
+      gap: 4px;
+      margin-top: 1rem;
+      height: 20px;
+      align-items: flex-end;
+    }
+    .wave span {
+      display: block;
+      width: 4px;
+      background: #dc2626;
+      border-radius: 2px;
+      animation: waveAnim 1s infinite ease-in-out;
+    }
+    .wave span:nth-child(1) { animation-delay: 0s; }
+    .wave span:nth-child(2) { animation-delay: 0.2s; }
+    .wave span:nth-child(3) { animation-delay: 0.4s; }
+    .wave span:nth-child(4) { animation-delay: 0.6s; }
+    .wave span:nth-child(5) { animation-delay: 0.8s; }
+
+    @keyframes waveAnim {
+      0%, 100% { height: 4px; }
+      50% { height: 20px; }
+    }
+
+    #status {
+      margin-top: 0.5rem;
+      color: #dc2626;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    audio {
+      width: 100%;
+      margin: 1rem 0;
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 1.2rem; }
+      button { font-size: 1rem; padding: 0.9rem; }
+    }
+
+    /* 🌙 Dark Mode */
+    @media (prefers-color-scheme: dark) {
+      body { background: var(--bg-gradient-dark); }
+      .app { background: var(--card-bg-dark); color: var(--text-dark); }
+      .btn-secondary { background: var(--btn-secondary-dark); color: var(--text-dark); }
+      .btn-secondary:hover { background: var(--btn-secondary-dark-hover); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>🎙️ Grabador de Audio</h1>
+
+    <div id="text"></div>
+
+    <div class="controls">
+      <button id="record" class="btn-primary" onclick="startRecording()">Grabar</button>
+      <button id="stop" class="btn-secondary" onclick="stopRecording()" style="display:none;" disabled>Detener</button>
+    </div>
+
+    <div id="record-stop-label" style="display:none;">Grabando...</div>
+    <div id="record-stop-loading" style="display:none;">Procesando...</div>
+    <div id="status"></div>
+
+    <!-- 🌊 Onda animada -->
+    <div id="wave" class="wave" style="display:none;">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <audio id="player" controls></audio>
+
+    <form id="audioForm" action="/audio" method="post" enctype="multipart/form-data" style="width:100%;">
+      <button type="submit" class="send-btn">Enviar</button>
+    </form>
+  </div>
+  <div id="transcript" style="margin-top:1rem; font-style:italic;"></div>
+<div id="ai-response" style="margin-top:1rem; padding:1rem; background:#f3f4f6; border-radius:8px;"></div>
+
+  <script src="grabador.js"></script>
+  <script>
+    // Inicializar recorder con URL y handler
+    recorder("/audio", handleAudioResponse);
+
+    function startRecording() {
+      document.getElementById("record").classList.add("recording");
+      document.getElementById("wave").style.display = "flex"; // mostrar onda
+      record();
+    }
+
+    function stopRecording() {
+      document.getElementById("record").classList.remove("recording");
+      document.getElementById("wave").style.display = "none"; // ocultar onda
+      stop();
+    }
+  </script>
+</body>
+</html>
