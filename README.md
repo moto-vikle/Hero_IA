@@ -1,2 +1,507 @@
-# Hero_IA
-Inteligencia_artifiial.
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Asistente IA - Aprendizaje Autónomo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e1b4b);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .container {
+      display: grid;
+      gap: 1rem;
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .app {
+      background: linear-gradient(135deg, #312e81, #1e3a8a);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      padding: 2rem;
+      color: #fff;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Controles */
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 0.8rem 1.2rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #2563eb; transform: translateY(-2px); }
+
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover:not(:disabled) { background: #dc2626; }
+
+    .btn-secondary { background: #64748b; color: #fff; }
+    .btn-secondary:hover:not(:disabled) { background: #475569; }
+
+    /* Indicador de estado */
+    .status-indicator {
+      background: #1e293b;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      display: none;
+      align-items: center;
+      gap: 0.8rem;
+      animation: pulse 2s infinite;
+    }
+
+    .status-indicator.active { display: flex; }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid #475569;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Chat */
+    #chat {
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 1.5rem;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 1rem;
+      scrollbar-width: thin;
+      scrollbar-color: #475569 #1e293b;
+    }
+
+    #chat::-webkit-scrollbar { width: 8px; }
+    #chat::-webkit-scrollbar-track { background: #1e293b; }
+    #chat::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+
+    .message-group {
+      margin-bottom: 1.5rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .bubble {
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      word-wrap: break-word;
+      max-width: 85%;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .bubble.user {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff;
+      margin-left: auto;
+      text-align: right;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bubble.ai {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 8px;
+      margin-top: 0.5rem;
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+    }
+
+    .ai .bubble-badge {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+
+    /* Feedback */
+    .feedback-btns {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      justify-content: flex-start;
+    }
+
+    .feedback-btn {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      color: #64748b;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.85rem;
+      min-width: auto;
+      flex: none;
+    }
+
+    .feedback-btn:hover { background: #f1f5f9; color: #10b981; }
+    .feedback-btn.negative:hover { color: #ef4444; }
+
+    /* Panel de Estadísticas */
+    .stats-panel {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background: #0f172a;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #3b82f6;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 0.3rem;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 1rem;
+      border-radius: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .controls { flex-direction: column; }
+      button { width: 100%; }
+      .stats-panel { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="app">
+      <h1>
+        <i class="fas fa-brain"></i>
+        Asistente IA - Aprendizaje Autónomo
+      </h1>
+      <p class="subtitle">🚀 Busca, aprende y mejora automáticamente</p>
+
+      <!-- Indicador de Estado -->
+      <div id="status" class="status-indicator">
+        <div class="spinner"></div>
+        <span id="status-text">Procesando...</span>
+      </div>
+
+      <!-- Controles -->
+      <div class="controls">
+        <button id="record" class="btn-primary">
+          <i class="fa-solid fa-microphone"></i> Grabar
+        </button>
+        <button id="stop" class="btn-danger" style="display:none;" disabled>
+          <i class="fa-solid fa-stop"></i> Detener
+        </button>
+        <button id="refresh-stats" class="btn-secondary">
+          <i class="fa-solid fa-chart-line"></i> Stats
+        </button>
+        <button id="clear" class="btn-secondary">
+          <i class="fa-solid fa-trash"></i> Limpiar
+        </button>
+      </div>
+
+      <audio id="player" controls></audio>
+
+      <!-- Estadísticas -->
+      <div class="stats-panel">
+        <div class="stat-card">
+          <span class="stat-value" id="stat-facts">0</span>
+          <span class="stat-label">Hechos Aprendidos</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-conversations">0</span>
+          <span class="stat-label">Conversaciones</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-areas">0</span>
+          <span class="stat-label">Áreas de Conocimiento</span>
+        </div>
+      </div>
+
+      <!-- Chat -->
+      <div id="chat"></div>
+    </div>
+  </div>
+
+  <script>
+    let rec, stream, blobs = [];
+    let lastUserMessage = "";
+    let lastAIResponse = "";
+
+    const recordBtn = document.getElementById("record");
+    const stopBtn = document.getElementById("stop");
+    const player = document.getElementById("player");
+    const chat = document.getElementById("chat");
+    const statusIndicator = document.getElementById("status");
+    const statusText = document.getElementById("status-text");
+
+    // Mostrar estado
+    function showStatus(text) {
+      statusText.textContent = text;
+      statusIndicator.classList.add("active");
+    }
+
+    function hideStatus() {
+      statusIndicator.classList.remove("active");
+    }
+
+    // Añadir mensaje al chat
+    function addMessage(text, type, metadata = {}) {
+      const group = document.createElement("div");
+      group.className = "message-group";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble " + type;
+      bubble.textContent = text;
+
+      // Badge para indicar si aprendió algo nuevo
+      if (metadata.learned) {
+        const badge = document.createElement("span");
+        badge.className = "bubble-badge";
+        badge.innerHTML = '<i class="fas fa-brain"></i> Información aprendida';
+        bubble.appendChild(badge);
+      }
+
+      group.appendChild(bubble);
+
+      // Botones de feedback solo para respuestas de IA
+      if (type === "ai") {
+        const feedbackDiv = document.createElement("div");
+        feedbackDiv.className = "feedback-btns";
+        
+        const thumbsUp = document.createElement("button");
+        thumbsUp.className = "feedback-btn";
+        thumbsUp.innerHTML = '<i class="fas fa-thumbs-up"></i> Útil';
+        thumbsUp.onclick = () => sendFeedback("positive");
+
+        const thumbsDown = document.createElement("button");
+        thumbsDown.className = "feedback-btn negative";
+        thumbsDown.innerHTML = '<i class="fas fa-thumbs-down"></i> Mejorar';
+        thumbsDown.onclick = () => sendFeedback("negative");
+
+        feedbackDiv.appendChild(thumbsUp);
+        feedbackDiv.appendChild(thumbsDown);
+        group.appendChild(feedbackDiv);
+      }
+
+      chat.appendChild(group);
+      chat.scrollTop = chat.scrollHeight;
+
+      // Guardar en localStorage
+      const history = JSON.parse(localStorage.getItem("chatHistory")) || [];
+      history.push({ text, type, metadata, timestamp: Date.now() });
+      localStorage.setItem("chatHistory", JSON.stringify(history));
+    }
+
+    // Enviar feedback
+    function sendFeedback(type) {
+      fetch("/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_input: lastUserMessage,
+          ai_response: lastAIResponse,
+          feedback: type
+        })
+      })
+      .then(res => res.json())
+      .then(() => {
+        const msg = type === "positive" ? "✅ Gracias por tu feedback" : "📝 Lo mejoraré";
+        showStatus(msg);
+        setTimeout(hideStatus, 2000);
+      })
+      .catch(err => console.error("Error enviando feedback:", err));
+    }
+
+    // Cargar estadísticas
+    function loadStats() {
+      fetch("/knowledge/stats")
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("stat-facts").textContent = data.total_facts || 0;
+          document.getElementById("stat-conversations").textContent = data.total_conversations || 0;
+          document.getElementById("stat-areas").textContent = data.knowledge_areas || 0;
+        })
+        .catch(err => console.error("Error cargando stats:", err));
+    }
+
+    // Cargar historial
+    window.onload = () => {
+      const history = JSON.parse(localStorage.getItem("chatHistory")) || [];
+      history.forEach(msg => {
+        const group = document.createElement("div");
+        group.className = "message-group";
+        const bubble = document.createElement("div");
+        bubble.className = "bubble " + msg.type;
+        bubble.textContent = msg.text;
+        group.appendChild(bubble);
+        chat.appendChild(group);
+      });
+      loadStats();
+    };
+
+    // Grabar audio
+    recordBtn.addEventListener("click", async () => {
+      try {
+        blobs = [];
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        rec = new MediaRecorder(stream);
+        rec.ondataavailable = e => { if (e.data.size > 0) blobs.push(e.data); };
+        rec.onstop = sendAudio;
+        rec.start();
+
+        recordBtn.disabled = true;
+        stopBtn.style.display = "";
+        stopBtn.disabled = false;
+        showStatus("🎤 Grabando...");
+      } catch (err) {
+        alert("No se pudo acceder al micrófono: " + err.message);
+        hideStatus();
+      }
+    });
+
+    stopBtn.addEventListener("click", () => {
+      rec.stop();
+      stream.getTracks().forEach(track => track.stop());
+      recordBtn.disabled = false;
+      stopBtn.style.display = "none";
+      showStatus("⏳ Procesando audio...");
+    });
+
+    function sendAudio() {
+      const blob = new Blob(blobs, { type: "audio/webm" });
+      player.src = URL.createObjectURL(blob);
+
+      const fd = new FormData();
+      fd.append("audio", blob, "audio.webm");
+
+      showStatus("🔍 Analizando y aprendiendo...");
+
+      fetch("/audio", { method: "POST", body: fd })
+        .then(res => res.json())
+        .then(data => {
+          hideStatus();
+          
+          if (data.raw_text) {
+            lastUserMessage = data.raw_text;
+            addMessage("🗣️ " + data.raw_text, "user");
+          }
+          
+          if (data.text) {
+            lastAIResponse = data.text;
+            addMessage("🤖 " + data.text, "ai", { learned: data.learned });
+          }
+          
+          if (data.file) {
+            const audioReply = new Audio("/static/" + data.file);
+            audioReply.play();
+          }
+
+          // Actualizar estadísticas
+          loadStats();
+        })
+        .catch(err => {
+          console.error("Error:", err);
+          hideStatus();
+          addMessage("❌ Error procesando la solicitud", "ai");
+        });
+    }
+
+    // Refrescar estadísticas
+    document.getElementById("refresh-stats").addEventListener("click", () => {
+      showStatus("📊 Cargando estadísticas...");
+      loadStats();
+      setTimeout(hideStatus, 1000);
+    });
+
+    // Limpiar historialÑ
+    document.getElementById("clear").addEventListener("click", () => {
+      if (confirm("⚠️ ¿Seguro que deseas borrar el historial?\n(El conocimiento aprendido se mantendrá)")) {
+        localStorage.removeItem("chatHistory");
+        chat.innerHTML = "";
+        showStatus("🗑️ Historial limpiado");
+        setTimeout(hideStatus, 2000);
+      }
+    });
+  </script>
+</body>
+</html>
